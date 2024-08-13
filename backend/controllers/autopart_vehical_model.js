@@ -131,40 +131,44 @@ exports.deleteVehicalModelById = async (req, res) => {
 }
 
 exports.addVehicalModel = async (req, res) => {
-    const { make, model, year, trim, engine_type, transmission, drivetrain, msrf, fuel_type, seating_capacity, dimensions, weight } = req.body;
-    if (!make || !model || !year || !trim || !engine_type || !transmission || !drivetrain || !msrf || !fuel_type || !seating_capacity || !dimensions || !weight) {
-        return res.status(422).json({error: 'All fields are required'});
+    const {vehicalModels} = req.body;
+    if (!vehicalModels) {
+        return res.status(400).json({error: 'Vehical model data is required'})
     }
-    console.log(make, model, year, trim, engine_type, transmission, drivetrain, msrf, fuel_type, seating_capacity, dimensions, weight);
-    try {
-        const existVehicalModel = await db.pool.query(
-            "SELECT EXISTS (SELECT * FROM autopart.vehical_model WHERE make = $1 AND model = $2 AND year = $3 AND trim = $4)", [make, model, year, trim]
-        )
-        if (existVehicalModel.length > 0) {
-            return res.status(409).json({error: 'Vehical model already exists'})
-        } else {
-            const result = await db.pool.query(
-                "INSERT INTO autopart.vehical_model (make, model, year, trim, engine_type, transmission, drivetrain, msrf, fuel_type, seating_capacity, dimensions, weight) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
-                [make, model, year, trim, engine_type, transmission, drivetrain, msrf, fuel_type, seating_capacity, dimensions, weight]
-            )
-            return res.status(201).json({message: 'Vehical model added successfully', vehicalModel: result.rows[0]})
+    for (let i = 0; i < vehicalModels.length; i++) {
+        const {make, model, year, trim, engine_type, transmission, drivetrain, msrf, fuel_type, seating_capacity, dimensions, weight} = vehicalModels[i];
+        if (!make || !model || !year || !trim || !engine_type || !transmission || !drivetrain || !msrf || !fuel_type || !seating_capacity || !dimensions || !weight) {
+            return res.status(400).json({error: 'All fields are required'})
         }
-    } catch (error) {
-        if (error.code === "23505" && error.constraint === "VehicalModel_pkey") {
-            await handleDuplicateId('vehical_model', 'VehicalModel_ID_seq');
-            const result = await db.pool.query(
-                "INSERT INTO autopart.vehical_model (make, model, year, trim, engine_type, transmission, drivetrain, msrf, fuel_type, seating_capacity, dimensions, weight) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
-                [make, model, year, trim, engine_type, transmission, drivetrain, msrf, fuel_type, seating_capacity, dimensions, weight]
+        try {
+            const existVehicalModel = await db.pool.query(
+                "SELECT EXISTS (SELECT * FROM autopart.vehical_model WHERE make = $1 AND model = $2 AND year = $3 AND trim = $4)", [make, model, year, trim]
             )
-            if (result.rows.length === 0) {
-                return res.status(500).json({error: 'Failed to add vehical model'})
+            if (existVehicalModel.length > 0) {
+                continue
+            } else {
+                const result = await db.pool.query(
+                    "INSERT INTO autopart.vehical_model (make, model, year, trim, engine_type, transmission, drivetrain, msrf, fuel_type, seating_capacity, dimensions, weight) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
+                    [make, model, year, trim, engine_type, transmission, drivetrain, msrf, fuel_type, seating_capacity, dimensions, weight]
+                )
             }
-            return res.status(201).json({message: 'Vehical model added successfully', vehicalModel: result.rows[0]})
-        } else {
-            await resetSequence('vehical_model', 'VehicalModel_ID_seq');
-            return res.status(500).json({error: error.message})
+        } catch (error) {
+            if (error.code === "23505" && error.constraint === "VehicalModel_pkey") {
+                await handleDuplicateId('vehical_model', 'VehicalModel_ID_seq');
+                const result = await db.pool.query(
+                    "INSERT INTO autopart.vehical_model (make, model, year, trim, engine_type, transmission, drivetrain, msrf, fuel_type, seating_capacity, dimensions, weight) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
+                    [make, model, year, trim, engine_type, transmission, drivetrain, msrf, fuel_type, seating_capacity, dimensions, weight]
+                )
+                if (result.rows.length === 0) {
+                    return res.status(500).json({error: 'Failed to add vehical model'})
+                }
+            } else {
+                await resetSequence('vehical_model', 'VehicalModel_ID_seq');
+                return res.status(500).json({error: error.message})
+            }
         }
     }
+    return res.status(201).json({message: 'Vehical model added successfully', vehicalModel: result.rows[0]})
 }
 
 exports.updateVehicalModelById = async (req, res) => {
