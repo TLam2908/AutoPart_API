@@ -137,8 +137,9 @@ exports.addVehicalModel = async (req, res) => {
     }
     for (let i = 0; i < vehicalModels.length; i++) {
         const {make, model, year, trim, engine_type, transmission, drivetrain, msrf, fuel_type, seating_capacity, dimensions, weight} = vehicalModels[i];
+        console.log(make, model, year, trim, engine_type, transmission, drivetrain, msrf, fuel_type, seating_capacity, dimensions, weight);
         if (!make || !model || !year || !trim || !engine_type || !transmission || !drivetrain || !msrf || !fuel_type || !seating_capacity || !dimensions || !weight) {
-            return res.status(400).json({error: 'All fields are required'})
+            return res.status(400).json({error: 'All fields are required for vehical model'});
         }
         try {
             const existVehicalModel = await db.pool.query(
@@ -168,7 +169,7 @@ exports.addVehicalModel = async (req, res) => {
             }
         }
     }
-    return res.status(201).json({message: 'Vehical model added successfully', vehicalModel: result.rows[0]})
+    return res.status(201).json({message: 'Vehical model added successfully'})
 }
 
 exports.updateVehicalModelById = async (req, res) => {
