@@ -78,27 +78,33 @@ exports.getManufacturerByParams = async (req, res) => {
 // Delete manufacturer by ID and abbreviation
 exports.deleteManufacturerById = async (req, res) => {
   try {
-    let { deleteParams } = req.params;
-    if (!deleteParams) {
-      return res
-        .status(400)
-        .json({ error: "Manufacturer ID or abbreviation is required" });
-    }
+    let { id, country, abbreviation } = req.query;
 
+    if (!id && !country && !abbreviation) {
+      return res.status(400).json({
+        error:
+          "No parameters provided. Please provide ID, abbreviation or country",
+      });
+    }
+    
     let query = "";
     let queryParams = [];
 
-    if (isNaN(deleteParams)) {
-      upperAbbreviation = deleteParams.toUpperCase();
-      query =
-        "DELETE FROM autopart.autopart_manufacturer WHERE abbreviation = $1 RETURNING *";
-      queryParams = [upperAbbreviation];
-      console.log("Deleting by abbreviation:", upperAbbreviation);
-    } else {
-      const parsedId = parseInt(deleteParams, 10);
+    if (id) {
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid ID format" });
+      }
       query =
         "DELETE FROM autopart.autopart_manufacturer WHERE id = $1 RETURNING *";
-      queryParams = [parsedId];
+      queryParams = [parseInt(id, 10)];
+    } else if (country) {
+      query =
+        "DELETE FROM autopart.autopart_manufacturer WHERE country ILIKE $1 RETURNING *";
+      queryParams = [country];
+    } else if (abbreviation) {
+      query =
+        "DELETE FROM autopart.autopart_manufacturer WHERE abbreviation = $1 RETURNING *";
+      queryParams = [abbreviation]
     }
 
     const result = await db.pool.query(query, queryParams);
