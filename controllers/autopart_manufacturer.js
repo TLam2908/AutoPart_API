@@ -5,7 +5,7 @@ const { handleDuplicateId, resetSequence } = require("../utils/duplicateId");
 exports.getAllManufacturers = async (req, res) => {
   try {
     const manufacturers = await db.pool.query(
-      "SELECT * FROM autopart_manufacturer ORDER BY id ASC"
+      "SELECT * FROM autopart_manufacturer ORDER BY id ASC;"
     );
     return res.status(200).json({manufacturers: manufacturers.rows});
   } catch (error) {
