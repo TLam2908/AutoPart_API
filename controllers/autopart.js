@@ -68,7 +68,7 @@ exports.deleteAutoPart = async (req, res) => {
 
     // Reset id sequence
     await db.pool.query(
-      `ALTER SEQUENCE autopart."AutoPart_PartID_seq" RESTART WITH ${deletedId}`
+      `ALTER SEQUENCE autopart."autopart_id_seq" RESTART WITH ${deletedId}`
     );
 
     return res
@@ -117,8 +117,8 @@ exports.addAutoPart = async (req, res) => {
         ]
       );
     } catch (error) {
-      if (error.code === "23505" && error.constraint === "AutoPart_pkey") {
-        await handleDuplicateId("autopart", "AutoPart_PartID_seq");
+      if (error.code === "23505" && error.constraint === "autopart_pkey") {
+        await handleDuplicateId("autopart", "autopart_id_seq");
         const result = await db.pool.query(
           "INSERT INTO autopart.autopart (part_name, description, oem_number, weight, manufacturer_id, category_code) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
           [
@@ -134,7 +134,7 @@ exports.addAutoPart = async (req, res) => {
           return res.status(500).json({ error: "Failed to add autopart" });
         }
       } else {
-        await resetSequence("autopart", "AutoPart_PartID_seq");
+        await resetSequence("autopart", "autopart_id_seq");
         return res.status(500).json({ error: error.message });
       }
     }

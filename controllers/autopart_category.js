@@ -71,7 +71,7 @@ exports.deleteCategoryByParams = async (req, res) => {
             return res.status(404).json({error: `Category with ID ${id} not found`});   
         }
 
-        await db.pool.query(`ALTER SEQUENCE autopart."AutoPartCategory_ID_seq" RESTART WITH ${deletedId};`);
+        await db.pool.query(`ALTER SEQUENCE autopart."autopart_category_id_seq" RESTART WITH ${deletedId};`);
         return res.status(200).json({message: 'Category deleted successfully', deletedId});
 
     } catch (error) {
@@ -94,8 +94,8 @@ exports.addCategory = async (req, res) => {
         return res.status(201).json(result.rows[0]);
 
     } catch (error) {
-        if (error.code === '23505' && error.constraint === "AutoPartCategory_pkey") {
-            await handleDuplicateId('autopart_category', 'AutoPartCategory_ID_seq');
+        if (error.code === '23505' && error.constraint === "autopart_category_pkey") {
+            await handleDuplicateId('autopart_category', 'autopart_category_id_seq');
             const result = await db.pool.query("INSERT INTO autopart.autopart_category (category_code, category_name, description) VALUES ($1, $2, $3) RETURNING *", [category_code, category_name, description]);
             if (result.rows.length === 0) {
                 return res.status(400).json({ error: "Failed to add category" });
@@ -106,7 +106,7 @@ exports.addCategory = async (req, res) => {
                 })
             }
         } else {
-            await resetSequence('autopart_category', 'AutoPartCategory_ID_seq');
+            await resetSequence('autopart_category', 'autopart_category_id_seq');
             return res.status(500).json({error: error.message});
         }
     }

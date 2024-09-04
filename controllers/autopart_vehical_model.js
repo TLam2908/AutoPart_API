@@ -120,7 +120,7 @@ exports.deleteVehicalModelById = async (req, res) => {
                     return res.status(404).json({error: `Vehical model with ID: ${id} not found`})
                 }
 
-                await db.pool.query(`AlTER SEQUENCE autopart."VehicalModel_ID_seq" RESTART WITH ${id};`);
+                await db.pool.query(`AlTER SEQUENCE autopart."vehicle_model_id_seq" RESTART WITH ${id};`);
 
                 return res.status(200).json({message: `Vehical model with ID: ${id} deleted`, vehicalModel: vehicalModel.rows[0]})
             }
@@ -154,8 +154,8 @@ exports.addVehicalModel = async (req, res) => {
                 )
             }
         } catch (error) {
-            if (error.code === "23505" && error.constraint === "VehicalModel_pkey") {
-                await handleDuplicateId('vehical_model', 'VehicalModel_ID_seq');
+            if (error.code === "23505" && error.constraint === "vehicle_model_pkey") {
+                await handleDuplicateId('vehical_model', 'vehicle_model_id_seq');
                 const result = await db.pool.query(
                     "INSERT INTO autopart.vehical_model (make, model, year, trim, engine_type, transmission, drivetrain, msrp, fuel_type, seating_capacity, dimensions, weight) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
                     [make, model, year, trim, engine_type, transmission, drivetrain, msrp, fuel_type, seating_capacity, dimensions, weight]
@@ -164,7 +164,7 @@ exports.addVehicalModel = async (req, res) => {
                     return res.status(500).json({error: 'Failed to add vehical model'})
                 }
             } else {
-                await resetSequence('vehical_model', 'VehicalModel_ID_seq');
+                await resetSequence('vehical_model', 'vehicle_model_id_seq');
                 return res.status(500).json({error: error.message})
             }
         }

@@ -111,7 +111,7 @@ exports.deleteManufacturerById = async (req, res) => {
     const deletedId = result.rows[0].id;
     // Reset id sequence
     await db.pool.query(
-      `ALTER SEQUENCE autopart."AutoPartManufacturer_ID_seq" RESTART WITH ${deletedId};`
+      `ALTER SEQUENCE autopart."autopart_manufacturer_id_seq" RESTART WITH ${deletedId};`
     );
 
     return res
@@ -148,11 +148,11 @@ exports.addManufacturer = async (req, res) => {
     } catch (error) {
       if (
         error.code === "23505" &&
-        error.constraint === "AutoPartManufacturer_pkey"
+        error.constraint === "autopart_manufacturer_pkey"
       ) {
         await handleDuplicateId(
           "autopart_manufacturer",
-          "AutoPartManufacturer_ID_seq"
+          "autopart_manufacturer_id_seq"
         );
         const result = await db.pool.query(
           "INSERT INTO autopart.autopart_manufacturer (manufacturer_name, country, type_of_part, abbreviation) VALUES ($1, $2, $3, $4) RETURNING *",
@@ -162,7 +162,7 @@ exports.addManufacturer = async (req, res) => {
           return res.status(500).json({ error: "Failed to add manufacturer" });
         } 
       } else {
-        await resetSequence("autopart_manufacturer", "AutoPartManufacturer_ID_seq");
+        await resetSequence("autopart_manufacturer", "autopart_manufacturer_id_seq");
         return res.status(500).json({ error: error.message });
       }
     }
