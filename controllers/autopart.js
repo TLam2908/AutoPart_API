@@ -47,7 +47,7 @@ exports.deleteAutoPart = async (req, res) => {
     if (!id && !oem_number) {
       return res.status(400).json({ error: "Missing id or oem_number" });
     }
-
+    const convert_oem_number = oem_number.toString();
     let query = "";
     let queryParams = [];
 
@@ -58,9 +58,9 @@ exports.deleteAutoPart = async (req, res) => {
         query = "DELETE FROM autopart.autopart WHERE id = $1 RETURNING *";
         queryParams.push(id);
       }
-    } else if (oem_number) {
+    } else if (convert_oem_number) {
       query = "DELETE FROM autopart.autopart WHERE oem_number = $1 RETURNING *";
-      queryParams.push(oem_number);
+      queryParams.push(convert_oem_number);
     }
 
     const deletedAutoPart = await db.pool.query(query, queryParams);
@@ -148,6 +148,7 @@ exports.updateAutopart = async (req, res) => {
     if (!oem_number) {
       return res.status(400).json({ error: "Missing oem_number" });
     } else {
+      const convert_oem_number = oem_number.toString();
       const updateFields = req.body;
       if (Object.keys(updateFields).length === 0) {
         return res.status(400).json({ error: "No fields to update" });
@@ -165,7 +166,7 @@ exports.updateAutopart = async (req, res) => {
         `
                 UPDATE autopart.autopart SET ${updateQuery.join(
                   ", "
-                )} WHERE oem_number = ${oem_number} RETURNING *`,
+                )} WHERE oem_number = ${convert_oem_number} RETURNING *`,
         values
       );
 
