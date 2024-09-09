@@ -156,6 +156,7 @@ exports.updateAutopart = async (req, res) => {
     if (!oem_number) {
       return res.status(400).json({ error: "Missing oem_number" });
     } else {
+      console.log(oem_number, typeof(oem_number))
       const convert_oem_number = oem_number.toString();
       console.log(typeof(convert_oem_number))
       const updateFields = req.body;
