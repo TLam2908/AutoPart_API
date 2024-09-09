@@ -12,7 +12,7 @@ exports.getAllAutoParts = async (req, res) => {
       return res.status(404).json({ error: "No autoparts found" });
     }
 
-    return res.status(200).json({autoparts: autoparts.rows});
+    return res.status(200).json({ autoparts: autoparts.rows });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -32,7 +32,9 @@ exports.getAutoPartByOemNumber = async (req, res) => {
     );
 
     if (autopart.rows.length === 0) {
-      return res.status(404).json({ error: `Autopart with oem_number ${oem_number} not found` });
+      return res
+        .status(404)
+        .json({ error: `Autopart with oem_number ${oem_number} not found` });
     }
 
     return res.status(200).json({ autopart_found: autopart.rows });
@@ -47,7 +49,6 @@ exports.deleteAutoPart = async (req, res) => {
     if (!id && !oem_number) {
       return res.status(400).json({ error: "Missing id or oem_number" });
     }
-    const convert_oem_number = oem_number.toString();
     let query = "";
     let queryParams = [];
 
@@ -58,7 +59,8 @@ exports.deleteAutoPart = async (req, res) => {
         query = "DELETE FROM autopart.autopart WHERE id = $1 RETURNING *";
         queryParams.push(id);
       }
-    } else if (convert_oem_number) {
+    } else if (oem_number) {
+      const convert_oem_number = oem_number.toString();
       query = "DELETE FROM autopart.autopart WHERE oem_number = $1 RETURNING *";
       queryParams.push(convert_oem_number);
     }
@@ -75,7 +77,6 @@ exports.deleteAutoPart = async (req, res) => {
       .status(200)
       .json({ message: "AutoPart deleted successfully", deletedId });
   } catch (error) {
-
     return res.status(500).json({ error: error.message });
   }
 };
@@ -95,7 +96,14 @@ exports.addAutoPart = async (req, res) => {
       category_code,
     } = autoparts[i];
     try {
-      console.log("Adding part:", {part_name, description, oem_number, weight, manufacturer_id, category_code});
+      console.log("Adding part:", {
+        part_name,
+        description,
+        oem_number,
+        weight,
+        manufacturer_id,
+        category_code,
+      });
       const existAutoPart = await db.pool.query(
         "SELECT EXISTS (SELECT * FROM autopart.autopart WHERE oem_number = $1)",
         [oem_number]
@@ -165,17 +173,15 @@ exports.updateAutopart = async (req, res) => {
       const updateResult = await db.pool.query(
         `
                 UPDATE autopart.autopart SET ${updateQuery.join(
-                  ", "
+                  ', ' 
                 )} WHERE oem_number = ${convert_oem_number} RETURNING *`,
         values
       );
 
-      return res
-        .status(200)
-        .json({
-          message: "Autopart updated successfully",
-          autopartUpdated: updateResult.rows[0],
-        });
+      return res.status(200).json({
+        message: "Autopart updated successfully",
+        autopartUpdated: updateResult.rows[0],
+      });
     }
   } catch (error) {
     return res.status(500).json({ error: error.message });
