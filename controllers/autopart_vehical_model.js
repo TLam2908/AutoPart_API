@@ -3,28 +3,28 @@ const { handleDuplicateId, resetSequence } = require('../utils/duplicateId');
 
 exports.getAllVehicalModels = async (req, res) => {
     try {
-        const vehicalModels = await db.pool.query('SELECT * FROM autopart.vehical_model ORDER BY id ASC');
-        return res.status(200).json({ vehicalModels: vehicalModels.rows});
+        const vehicleModels = await db.pool.query('SELECT * FROM autopart.vehicle_model ORDER BY id ASC');
+        return res.status(200).json({ vehicleModels: vehicleModels.rows});
     } catch (error) {
         return res.status(500).json({error: error.message});
     }
 }
 
 // Get vehical model by ID
-exports.getVehicalModelById = async (req, res) => {
+exports.getVehicleModelById = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
-            return res.status(400).json({error: 'Vehical model ID is required'});
+            return res.status(400).json({error: 'Vehicle model ID is required'});
         } else {
             if (isNaN(id)) {
                 return res.status(400).json({error: 'Invalid ID format'})
             } else {
-                const vehicalModel = await db.pool.query('SELECT * FROM autopart.vehical_model WHERE id = $1 ORDER BY id ASC', [parseInt(id, 10)]);
-                if (vehicalModel.rows.length === 0) {
-                    return res.status(404).json({error: `Vehical model with ID ${id} not found`});
+                const vehicleModel = await db.pool.query('SELECT * FROM autopart.vehicle_model WHERE id = $1 ORDER BY id ASC', [parseInt(id, 10)]);
+                if (vehicleModel.rows.length === 0) {
+                    return res.status(404).json({error: `Vehicle model with ID ${id} not found`});
                 }
-                return res.status(200).json({message: `Vehical model with ID ${id}`, vehicalModel: vehicalModel.rows[0]});
+                return res.status(200).json({message: `Vehicle model with ID ${id}`, vehicleModel: vehicleModel.rows[0]});
             }
         }
     } catch (error) {
@@ -32,11 +32,11 @@ exports.getVehicalModelById = async (req, res) => {
     }   
 }
 
-exports.getVehicalModelByQuery = async (req, res) => {
+exports.getVehicleModelByQuery = async (req, res) => {
     try {
         const { make, model, year, trim, engine_type, transmission, drivetrain, msrf, fuel_type, seating, dimension, weight } = req.query;
         console.log(make, model, year, trim, engine_type, transmission, drivetrain, msrf, fuel_type, seating, dimension, weight);
-        let query = 'SELECT * FROM autopart.vehical_model WHERE 1=1 '
+        let query = 'SELECT * FROM autopart.vehicle_model WHERE 1=1 '
         const queryParams = [];
         let paramIndex = 1;
 
@@ -94,35 +94,35 @@ exports.getVehicalModelByQuery = async (req, res) => {
 
         console.log(query, queryParams)
 
-        const vehicalModel = await db.pool.query(query, queryParams);
-        if (vehicalModel.rows.length === 0) {
-            return res.status(404).json({error: 'Vehical model not found'});    
+        const vehicleModel = await db.pool.query(query, queryParams);
+        if (vehicleModel.rows.length === 0) {
+            return res.status(404).json({error: 'Vehicle model not found'});    
         }
 
-        return res.status(200).json({message: 'Vehical model found', vehicalModel: vehicalModel.rows});
+        return res.status(200).json({message: 'Vehicle model found', vehicleModel: vehicleModel.rows});
 
     } catch (error) {
         return res.status(500).json({error: error.message});
     }
 }
 
-exports.deleteVehicalModelById = async (req, res) => {
+exports.deleteVehicleModelById = async (req, res) => {
     try {
         const { id } = req.params
         if (!id) {
-            return res.status(400).json({error: "Vehical model ID is required"})
+            return res.status(400).json({error: "Vehicle model ID is required"})
         } else {
             if (isNaN(id)) {
                 return res.status(400).json({error: "Invalid ID format"})
             } else {
-                const vehicalModel = await db.pool.query("DELETE FROM autopart.vehical_model WHERE id = $1 RETURNING *", [parseInt(id, 10)])
-                if (vehicalModel.rows.length === 0) {
-                    return res.status(404).json({error: `Vehical model with ID: ${id} not found`})
+                const vehicleModel = await db.pool.query("DELETE FROM autopart.vehicle_model WHERE id = $1 RETURNING *", [parseInt(id, 10)])
+                if (vehicleModel.rows.length === 0) {
+                    return res.status(404).json({error: `Vehicle model with ID: ${id} not found`})
                 }
 
                 await db.pool.query(`AlTER SEQUENCE autopart."vehicle_model_id_seq" RESTART WITH ${id};`);
 
-                return res.status(200).json({message: `Vehical model with ID: ${id} deleted`, vehicalModel: vehicalModel.rows[0]})
+                return res.status(200).json({message: `Vehicle model with ID: ${id} deleted`, vehicleModel: vehicleModel.rows[0]})
             }
         }
     } catch (error) {
@@ -130,53 +130,53 @@ exports.deleteVehicalModelById = async (req, res) => {
     }
 }
 
-exports.addVehicalModel = async (req, res) => {
-    const {vehicalModels} = req.body;
-    if (!vehicalModels) {
-        return res.status(400).json({error: 'Vehical model data is required'})
+exports.addVehicleModel = async (req, res) => {
+    const {vehicleModels} = req.body;
+    if (!vehicleModels) {
+        return res.status(400).json({error: 'Vehicle model data is required'})
     }
-    for (let i = 0; i < vehicalModels.length; i++) {
-        const {make, model, year, trim, engine_type, transmission, drivetrain, msrp, fuel_type, seating_capacity, dimensions, weight} = vehicalModels[i];
+    for (let i = 0; i < vehicleModels.length; i++) {
+        const {make, model, year, trim, engine_type, transmission, drivetrain, msrp, fuel_type, seating_capacity, dimensions, weight} = vehicleModels[i];
         console.log(make, model, year, trim, engine_type, transmission, drivetrain, msrp, fuel_type, seating_capacity, dimensions, weight);
         if (!make || !model || !year || !trim || !engine_type || !transmission || !drivetrain || !msrp || !fuel_type || !seating_capacity || !dimensions || !weight) {
-            return res.status(400).json({error: 'All fields are required for vehical model'});
+            return res.status(400).json({error: 'All fields are required for vehicle model'});
         }
         try {
-            const existVehicalModel = await db.pool.query(
-                "SELECT EXISTS (SELECT * FROM autopart.vehical_model WHERE make = $1 AND model = $2 AND year = $3 AND trim = $4)", [make, model, year, trim]
+            const existVehicleModel = await db.pool.query(
+                "SELECT EXISTS (SELECT * FROM autopart.vehicle_model WHERE make = $1 AND model = $2 AND year = $3 AND trim = $4)", [make, model, year, trim]
             )
-            if (existVehicalModel.length > 0) {
+            if (existVehicleModel.length > 0) {
                 continue
             } else {
                 const result = await db.pool.query(
-                    "INSERT INTO autopart.vehical_model (make, model, year, trim, engine_type, transmission, drivetrain, msrp, fuel_type, seating_capacity, dimensions, weight) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
+                    "INSERT INTO autopart.vehicle_model (make, model, year, trim, engine_type, transmission, drivetrain, msrp, fuel_type, seating_capacity, dimensions, weight) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
                     [make, model, year, trim, engine_type, transmission, drivetrain, msrp, fuel_type, seating_capacity, dimensions, weight]
                 )
             }
         } catch (error) {
             if (error.code === "23505" && error.constraint === "vehicle_model_pkey") {
-                await handleDuplicateId('vehical_model', 'vehicle_model_id_seq');
+                await handleDuplicateId('vehicle_model', 'vehicle_model_id_seq');
                 const result = await db.pool.query(
-                    "INSERT INTO autopart.vehical_model (make, model, year, trim, engine_type, transmission, drivetrain, msrp, fuel_type, seating_capacity, dimensions, weight) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
+                    "INSERT INTO autopart.vehicle_model (make, model, year, trim, engine_type, transmission, drivetrain, msrp, fuel_type, seating_capacity, dimensions, weight) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
                     [make, model, year, trim, engine_type, transmission, drivetrain, msrp, fuel_type, seating_capacity, dimensions, weight]
                 )
                 if (result.rows.length === 0) {
                     return res.status(500).json({error: 'Failed to add vehical model'})
                 }
             } else {
-                await resetSequence('vehical_model', 'vehicle_model_id_seq');
+                await resetSequence('vehicle_model', 'vehicle_model_id_seq');
                 return res.status(500).json({error: error.message})
             }
         }
     }
-    return res.status(201).json({message: 'Vehical model added successfully'})
+    return res.status(201).json({message: 'Vehicle model added successfully'})
 }
 
-exports.updateVehicalModelById = async (req, res) => {
+exports.updateVehicleModelById = async (req, res) => {
     try {
         const { id } = req.params
         if (!id) {
-            return res.status(400).json({error: "Vehical model ID is required"})
+            return res.status(400).json({error: "Vehicle model ID is required"})
         } else {
             if (isNaN(id)) {
                 return res.status(400).json({error: "Invalid ID format"})   
@@ -195,12 +195,12 @@ exports.updateVehicalModelById = async (req, res) => {
             })
 
             const updateResult = await db.pool.query(
-                `UPDATE autopart.vehical_model SET ${updateQueries.join(',')} WHERE id = ${id} RETURNING *`, values
+                `UPDATE autopart.vehicle_model SET ${updateQueries.join(',')} WHERE id = ${id} RETURNING *`, values
             )
             if (updateResult.rows.length === 0) {
-                return res.status(400).json({error: "Failed to update vehical model"})
+                return res.status(400).json({error: "Failed to update vehicle model"})
             }
-            return res.status(200).json({message: `Vehical model with ID: ${id} updated successfully`, vehicalModel: updateResult.rows[0]})
+            return res.status(200).json({message: `Vehicle model with ID: ${id} updated successfully`, vehicleModel: updateResult.rows[0]})
         }
     } catch (error) {
         return res.status(500).json({error: error.message})
