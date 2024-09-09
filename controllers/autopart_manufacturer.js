@@ -175,7 +175,7 @@ exports.updateManufacturer = async (req, res) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.atatus(400).json({ error: "Manufacturer ID is required" });
+      return res.status(400).json({ error: "Manufacturer ID is required" });
     } else {
       if (isNaN(id)) {
         return res.status(400).json({ error: "Invalid ID format" });
@@ -198,12 +198,12 @@ exports.updateManufacturer = async (req, res) => {
       const updateResult = await db.pool.query(
         `UPDATE autopart.autopart_manufacturer SET ${updateQueries.join(
           ", "
-        )} WHERE id = ${updateParams} RETURNING *`,
+        )} WHERE id = ${id} RETURNING *`,
         values
       );
 
       return res.status(200).json({
-        message: `Manufacturer ${updateParams} updated successfully`,
+        message: `Manufacturer ${id} updated successfully`,
         manufacturerUpdated: updateResult.rows[0],
       });
     }
