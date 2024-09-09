@@ -1,7 +1,7 @@
 const db = require('../services/database');
 const { handleDuplicateId, resetSequence } = require('../utils/duplicateId');
 
-exports.getAllVehicalModels = async (req, res) => {
+exports.getAllVehicleModels = async (req, res) => {
     try {
         const vehicleModels = await db.pool.query('SELECT * FROM autopart.vehicle_model ORDER BY id ASC');
         return res.status(200).json({ vehicleModels: vehicleModels.rows});
