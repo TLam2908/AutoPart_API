@@ -171,13 +171,10 @@ exports.updateAutopart = async (req, res) => {
       });
 
       const updateResult = await db.pool.query(
-        `
-                UPDATE autopart.autopart SET ${updateQuery.join(
-                  ', ' 
-                )} WHERE oem_number = ${convert_oem_number} RETURNING *`,
+        `UPDATE autopart.autopart SET ${updateQuery.join(',')} WHERE oem_number = ${convert_oem_number} RETURNING *`,
         values
       );
-
+      
       return res.status(200).json({
         message: "Autopart updated successfully",
         autopartUpdated: updateResult.rows[0],
