@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Autopart_Manufacturer {
+  MANU_ID String @unique
+  MANU_NAME String
+  MANU_COUNTRY String
+  MANU_CATEGORY String
+  MANU_ABBREVIATION String
+
+  Autopart Autopart[]
+}
+
+model Autopart_Category {
+  CATE_CODE String @unique
+  CATE_NAME String
+  CATE_DESCRIPTION String?
+
+  Autopart Autopart[]
+}
+
+model Autopart {
+  PART_ID Int @id @default(autoincrement())
+  PART_NAME String
+  PART_DESCRIPTION String?
+  PART_OEM String
+  PART_WEIGHT String
+  MANU_ID String
+  CATE_CODE String
+
+  Autopart_Model Autopart_Model[]
+
+  Autopart_Manufacturer Autopart_Manufacturer @relation(fields: [MANU_ID], references: [MANU_ID])
+  Autopart_Category Autopart_Category @relation(fields: [CATE_CODE], references: [CATE_CODE])
+}
+
+model Model {
+  MODEL_ID Int @id @default(autoincrement())
+  MODEL_NAME String
+  MODEL_MAKE String
+
+  Autopart_Model Autopart_Model[]
+  @@unique([MODEL_NAME, MODEL_MAKE])
+}
+
+model Autopart_Model {
+  MODE_NAME  String
+  PART_ID    Int  @id
+  PART_OEM   String
+  MODE_YEARS Int
+  MODE_MAKE  String
+  
+  Autopart Autopart @relation(fields: [PART_ID], references: [PART_ID])
+  Model Model @relation(fields: [MODE_NAME, MODE_MAKE], references: [MODEL_NAME, MODEL_MAKE])
+}
+

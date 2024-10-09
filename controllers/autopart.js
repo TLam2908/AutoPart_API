@@ -157,8 +157,6 @@ exports.updateAutopart = async (req, res) => {
       return res.status(400).json({ error: "Missing oem_number" });
     } else {
       console.log(oem_number, typeof(oem_number))
-      const convert_oem_number = oem_number.toString();
-      console.log(typeof(convert_oem_number))
       const updateFields = req.body;
       if (Object.keys(updateFields).length === 0) {
         return res.status(400).json({ error: "No fields to update" });
@@ -173,7 +171,7 @@ exports.updateAutopart = async (req, res) => {
       });
 
       const updateResult = await db.pool.query(
-        `UPDATE autopart.autopart SET ${updateQuery.join(',')} WHERE oem_number = ${convert_oem_number} RETURNING *`,
+        `UPDATE autopart.autopart SET ${updateQuery.join(',')} WHERE oem_number = ${oem_number} RETURNING *`,
         values
       );
       
